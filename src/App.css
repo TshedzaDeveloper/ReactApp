@@ -1,0 +1,126 @@
+/* Modern color palette */
+:root {
+  --primary-color: #6c5ce7;
+  --secondary-color: #a8a4e6;
+  --background-color: #f9f7fe;
+  --text-color: #2d3436;
+  --card-background: #ffffff;
+}
+
+/* Base styles */
+.app {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--background-color);
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Date styles */
+.date {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+/* Quote card styles */
+.quote-card {
+  background-color: var(--card-background);
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(108, 92, 231, 0.1);
+  margin-bottom: 2rem;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quote {
+  font-size: 1.5rem;
+  line-height: 1.6;
+  color: var(--text-color);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Button styles */
+.inspire-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.2);
+}
+
+.inspire-button:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+.inspire-button:active {
+  transform: translateY(0);
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .quote {
+    font-size: 1.2rem;
+  }
+  
+  .date {
+    font-size: 1.2rem;
+  }
+  
+  .quote-card {
+    padding: 1.5rem;
+  }
+  
+  .inspire-button {
+    padding: 0.8rem 1.6rem;
+    font-size: 1rem;
+  }
+} 
