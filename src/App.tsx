@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 // Array of motivational quotes
@@ -20,14 +20,71 @@ const App: React.FC = () => {
   const [currentQuote, setCurrentQuote] = useState<string>(quotes[0]);
   // State for animation
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  // State for welcome screen
+  const [showWelcome, setShowWelcome] = useState<boolean>(true);
+  // State for dark mode
+  const [darkMode, setDarkMode] = useState<boolean>(false);
+  // State for confetti
+  const [showConfetti, setShowConfetti] = useState<boolean>(false);
+  
+  // References to audio elements
+  const welcomeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Effect for initial welcome animation
+  useEffect(() => {
+    // Play welcome sound
+    if (welcomeAudioRef.current) {
+      welcomeAudioRef.current.volume = 0.3;
+      welcomeAudioRef.current.play().catch(e => console.log("Audio play failed:", e));
+    }
+    
+    // Hide welcome screen after delay
+    const timer = setTimeout(() => {
+      setShowWelcome(false);
+    }, 3000);
+    
+    // Apply dark mode from localStorage if exists
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(savedDarkMode);
+    document.body.className = savedDarkMode ? 'dark-mode' : '';
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Effect for dark mode
+  useEffect(() => {
+    document.body.className = darkMode ? 'dark-mode' : '';
+    localStorage.setItem('darkMode', darkMode.toString());
+  }, [darkMode]);
 
   // Function to get a random quote
   const getRandomQuote = (): void => {
     setIsAnimating(true);
+    
+    // Play notification sound
+    if (notificationAudioRef.current) {
+      notificationAudioRef.current.currentTime = 0;
+      notificationAudioRef.current.play().catch(e => console.log("Audio play failed:", e));
+    }
+    
+    // Show confetti
+    setShowConfetti(true);
+    
     setTimeout(() => {
-      const randomIndex = Math.floor(Math.random() * quotes.length);
-      setCurrentQuote(quotes[randomIndex]);
+      let newQuote = currentQuote;
+      // Make sure we don't get the same quote twice
+      while (newQuote === currentQuote) {
+        const randomIndex = Math.floor(Math.random() * quotes.length);
+        newQuote = quotes[randomIndex];
+      }
+      setCurrentQuote(newQuote);
       setIsAnimating(false);
+      
+      // Hide confetti after 2 seconds
+      setTimeout(() => {
+        setShowConfetti(false);
+      }, 2000);
     }, 300); // Match this with CSS animation duration
   };
 
@@ -39,21 +96,69 @@ const App: React.FC = () => {
     day: 'numeric'
   });
 
+  // Toggle dark mode
+  const toggleDarkMode = (): void => {
+    setDarkMode(!darkMode);
+  };
+
   return (
-    <div className="app">
-      <div className="container">
-        <h1 className="date">{today}</h1>
-        <div className={`quote-card ${isAnimating ? 'fade-out' : 'fade-in'}`}>
-          <p className="quote">{currentQuote}</p>
+    <>
+      {/* Welcome screen */}
+      {showWelcome && (
+        <div className="welcome-screen">
+          <div className="welcome-content">
+            <h1 className="welcome-title">Welcome</h1>
+            <p className="welcome-subtitle">Daily Inspiration Awaits</p>
+          </div>
         </div>
+      )}
+      
+      {/* Main app */}
+      <div className={`app ${darkMode ? 'dark' : 'light'}`}>
+        {/* Dark mode toggle */}
         <button 
-          className="inspire-button"
-          onClick={getRandomQuote}
+          className="dark-mode-toggle"
+          onClick={toggleDarkMode}
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
-          Get Inspired
+          {darkMode ? "☀️" : "🌙"}
         </button>
+        
+        <div className="container">
+          <h1 className="date">{today}</h1>
+          <div className={`quote-card ${isAnimating ? 'fade-out' : 'fade-in'}`}>
+            <p className="quote">{currentQuote}</p>
+          </div>
+          <button 
+            className="inspire-button"
+            onClick={getRandomQuote}
+          >
+            Get Inspired
+          </button>
+        </div>
+        
+        {/* Audio elements */}
+        <audio ref={welcomeAudioRef} src="/assets/sounds/welcome.mp3" />
+        <audio ref={notificationAudioRef} src="/assets/sounds/notification.mp3" />
+        
+        {/* Confetti effect */}
+        {showConfetti && (
+          <div className="confetti">
+            {[...Array(50)].map((_, i) => (
+              <div 
+                key={i} 
+                className="confetti-piece" 
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  backgroundColor: `hsl(${Math.random() * 360}, 100%, 50%)`
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 
