@@ -66,7 +66,7 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 999;
-  animation: welcomeFade 3s forwards;
+  animation: welcomeFade 5s forwards;
 }
 
 .welcome-content {
@@ -80,11 +80,57 @@ body {
   margin-bottom: 0.5rem;
   letter-spacing: 2px;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  animation: pulsate 2s infinite;
 }
 
 .welcome-subtitle {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   opacity: 0.9;
+  margin-bottom: 30px;
+}
+
+.welcome-loading {
+  width: 300px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.welcome-loading-bar {
+  height: 100%;
+  width: 0%;
+  background: white;
+  border-radius: 10px;
+  animation: loadingProgress 4.5s forwards;
+}
+
+@keyframes loadingProgress {
+  0% {
+    width: 0%;
+  }
+  80% {
+    width: 90%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes pulsate {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    transform: scale(1.03);
+    text-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
 }
 
 @keyframes welcomeFade {
@@ -210,11 +256,25 @@ body {
   box-shadow: 0 4px 10px var(--shadow-color);
   z-index: 10;
   transition: transform 0.3s, box-shadow 0.3s;
+  animation: floatButton 3s ease-in-out infinite;
+}
+
+@keyframes floatButton {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 
 .dark-mode-toggle:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 15px var(--shadow-hover);
+  animation: none;
 }
 
 /* Confetti animation */
@@ -233,7 +293,6 @@ body {
   width: 10px;
   height: 10px;
   top: -20px;
-  border-radius: 0;
   animation: confettiFall 4s linear forwards;
   transform: rotate(0);
 }
@@ -331,4 +390,56 @@ body {
   bottom: -50px;
   left: -50px;
   border-radius: 50%;
+}
+
+/* View toggle button */
+.view-toggle-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 10px var(--shadow-color);
+  z-index: 10;
+  transition: transform 0.3s, box-shadow 0.3s;
+  animation: pulseButton 2s infinite;
+}
+
+@keyframes pulseButton {
+  0% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(108, 92, 231, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+  }
+}
+
+.view-toggle-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px var(--shadow-hover);
+  animation: none;
+}
+
+/* Responsive design for buttons */
+@media (max-width: 768px) {
+  .view-toggle-button {
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+  }
+  
+  .view-toggle-button:hover {
+    transform: translateX(-50%) scale(1.05);
+  }
 } 
