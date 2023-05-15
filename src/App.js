@@ -1,34 +1,176 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
-// Array of motivational quotes
-const quotes = [
-  "The only way to do great work is to love what you do.",
-  "Believe you can and you're halfway there.",
-  "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-  "Your time is limited, don't waste it living someone else's life.",
-  "The future belongs to those who believe in the beauty of their dreams.",
-  "Don't watch the clock; do what it does. Keep going.",
-  "Everything you've ever wanted is on the other side of fear.",
-  "The best way to predict the future is to create it.",
-  "You are never too old to set another goal or to dream a new dream.",
-  "The only limit to our realization of tomorrow is our doubts of today."
-];
+// Todo component directly in App.js to avoid import issues
+const Todo = () => {
+  const [todos, setTodos] = useState([]);
+  const [inputValue, setInputValue] = useState('');
 
-function App() {
-  // State for the current quote
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleAddTodo = () => {
+    if (inputValue.trim() !== '') {
+      const newTodo = {
+        id: Date.now(),
+        text: inputValue,
+        completed: false
+      };
+      setTodos([...todos, newTodo]);
+      setInputValue('');
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleAddTodo();
+    }
+  };
+
+  const toggleComplete = (id) => {
+    setTodos(
+      todos.map(todo =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  };
+
+  const deleteTodo = (id) => {
+    setTodos(todos.filter(todo => todo.id !== id));
+  };
+
+  return (
+    <div className="todo-container">
+      <h2 className="todo-title">Daily Tasks</h2>
+      
+      <div className="todo-input-container">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          placeholder="Add a new task..."
+          className="todo-input"
+        />
+        <button onClick={handleAddTodo} className="todo-add-button">
+          Add
+        </button>
+      </div>
+      
+      <ul className="todo-list">
+        {todos.map(todo => (
+          <li key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+            <span 
+              className="todo-text" 
+              onClick={() => toggleComplete(todo.id)}
+            >
+              {todo.text}
+            </span>
+            <div className="todo-actions">
+              <button 
+                className="todo-toggle-button" 
+                onClick={() => toggleComplete(todo.id)}
+              >
+                {todo.completed ? '↩️' : '✓'}
+              </button>
+              <button 
+                className="todo-delete-button" 
+                onClick={() => deleteTodo(todo.id)}
+              >
+                ✕
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      
+      {todos.length === 0 && (
+        <p className="todo-empty-message">No tasks yet. Add some to get started!</p>
+      )}
+    </div>
+  );
+};
+
+// Main App component
+const App = () => {
+  // Array of motivational quotes
+  const quotes = [
+    "The only way to do great work is to love what you do.",
+    "Believe you can and you're halfway there.",
+    "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+    "Your time is limited, don't waste it living someone else's life.",
+    "The future belongs to those who believe in the beauty of their dreams."
+  ];
+
+  // States
   const [currentQuote, setCurrentQuote] = useState(quotes[0]);
-  // State for animation
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showTodo, setShowTodo] = useState(false);
+  
+  // References
+  const welcomeAudioRef = useRef(null);
+  const notificationAudioRef = useRef(null);
+  
+  // Effect for welcome animation
+  useEffect(() => {
+    // Play welcome sound
+    if (welcomeAudioRef.current) {
+      welcomeAudioRef.current.volume = 0.3;
+      welcomeAudioRef.current.play().catch(e => console.log("Audio play failed:", e));
+    }
+    
+    // Hide welcome screen after delay
+    const timer = setTimeout(() => {
+      setShowWelcome(false);
+      
+      // Show confetti after welcome screen
+      setShowConfetti(true);
+      setTimeout(() => {
+        setShowConfetti(false);
+      }, 3000);
+      
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Effect for dark mode
+  useEffect(() => {
+    document.body.className = darkMode ? 'dark-mode' : '';
+  }, [darkMode]);
 
   // Function to get a random quote
   const getRandomQuote = () => {
     setIsAnimating(true);
+    
+    // Play notification sound
+    if (notificationAudioRef.current) {
+      notificationAudioRef.current.currentTime = 0;
+      notificationAudioRef.current.play().catch(e => console.log("Audio play failed:", e));
+    }
+    
+    // Show confetti
+    setShowConfetti(true);
+    
     setTimeout(() => {
-      const randomIndex = Math.floor(Math.random() * quotes.length);
-      setCurrentQuote(quotes[randomIndex]);
+      let newQuote = currentQuote;
+      // Make sure we don't get the same quote twice
+      while (newQuote === currentQuote) {
+        const randomIndex = Math.floor(Math.random() * quotes.length);
+        newQuote = quotes[randomIndex];
+      }
+      setCurrentQuote(newQuote);
       setIsAnimating(false);
-    }, 300); // Match this with CSS animation duration
+      
+      // Hide confetti after some time
+      setTimeout(() => {
+        setShowConfetti(false);
+      }, 3000);
+    }, 300);
   };
 
   // Get today's date
@@ -39,22 +181,105 @@ function App() {
     day: 'numeric'
   });
 
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    
+    // Show confetti when toggling dark mode
+    setShowConfetti(true);
+    setTimeout(() => {
+      setShowConfetti(false);
+    }, 2000);
+  };
+  
+  // Toggle between views
+  const toggleView = () => {
+    setShowTodo(!showTodo);
+    
+    if (notificationAudioRef.current) {
+      notificationAudioRef.current.currentTime = 0;
+      notificationAudioRef.current.play().catch(e => console.log("Audio play failed:", e));
+    }
+  };
+
   return (
-    <div className="app">
-      <div className="container">
-        <h1 className="date">{today}</h1>
-        <div className={`quote-card ${isAnimating ? 'fade-out' : 'fade-in'}`}>
-          <p className="quote">{currentQuote}</p>
+    <>
+      {/* Welcome screen */}
+      {showWelcome && (
+        <div className="welcome-screen">
+          <div className="welcome-content">
+            <h1 className="welcome-title">Welcome!</h1>
+            <p className="welcome-subtitle">Your Daily Inspiration App</p>
+            <div className="welcome-loading">
+              <div className="welcome-loading-bar"></div>
+            </div>
+          </div>
         </div>
+      )}
+      
+      {/* Main app */}
+      <div className={`app ${darkMode ? 'dark' : 'light'}`}>
+        {/* Dark mode toggle */}
         <button 
-          className="inspire-button"
-          onClick={getRandomQuote}
+          className="dark-mode-toggle"
+          onClick={toggleDarkMode}
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
-          Get Inspired
+          {darkMode ? "☀️" : "🌙"}
         </button>
+        
+        {/* View toggle button */}
+        <button 
+          className="view-toggle-button"
+          onClick={toggleView}
+        >
+          {showTodo ? "Show Quote" : "Show Tasks"}
+        </button>
+        
+        <div className="container">
+          <h1 className="date">{today}</h1>
+          
+          {showTodo ? (
+            <Todo />
+          ) : (
+            <div className={`quote-card ${isAnimating ? 'fade-out' : 'fade-in'}`}>
+              <p className="quote">{currentQuote}</p>
+              
+              <button 
+                className="inspire-button"
+                onClick={getRandomQuote}
+              >
+                Get Inspired
+              </button>
+            </div>
+          )}
+        </div>
+        
+        {/* Audio elements */}
+        <audio ref={welcomeAudioRef} src="assets/sounds/welcome.mp3" />
+        <audio ref={notificationAudioRef} src="assets/sounds/notification.mp3" />
+        
+        {/* Confetti effect */}
+        {showConfetti && (
+          <div className="confetti">
+            {[...Array(100)].map((_, i) => (
+              <div 
+                key={i} 
+                className="confetti-piece" 
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  backgroundColor: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                  width: `${Math.random() * 10 + 5}px`,
+                  height: `${Math.random() * 10 + 5}px`,
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
-}
+};
 
 export default App; 
