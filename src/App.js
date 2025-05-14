@@ -96,13 +96,33 @@ const Todo = () => {
 
 // Main App component
 const App = () => {
-  // Array of motivational quotes
+  // Array of motivational quotes with matching image URLs
   const quotes = [
-    "The only way to do great work is to love what you do.",
-    "Believe you can and you're halfway there.",
-    "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-    "Your time is limited, don't waste it living someone else's life.",
-    "The future belongs to those who believe in the beauty of their dreams."
+    {
+      text: "The only way to do great work is to love what you do.",
+      imageUrl: "https://source.unsplash.com/1200x800/?success,passion",
+      author: "Steve Jobs"
+    },
+    {
+      text: "Believe you can and you're halfway there.",
+      imageUrl: "https://source.unsplash.com/1200x800/?motivation,belief",
+      author: "Theodore Roosevelt"
+    },
+    {
+      text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+      imageUrl: "https://source.unsplash.com/1200x800/?perseverance,courage",
+      author: "Winston Churchill"
+    },
+    {
+      text: "Your time is limited, don't waste it living someone else's life.",
+      imageUrl: "https://source.unsplash.com/1200x800/?authentic,freedom",
+      author: "Steve Jobs"
+    },
+    {
+      text: "The future belongs to those who believe in the beauty of their dreams.",
+      imageUrl: "https://source.unsplash.com/1200x800/?dreams,future",
+      author: "Eleanor Roosevelt"
+    }
   ];
 
   // States
@@ -112,6 +132,7 @@ const App = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showTodo, setShowTodo] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(true);
   
   // References
   const welcomeAudioRef = useRef(null);
@@ -148,6 +169,7 @@ const App = () => {
   // Function to get a random quote
   const getRandomQuote = () => {
     setIsAnimating(true);
+    setImageLoaded(false);
     
     // Play notification sound
     if (notificationAudioRef.current) {
@@ -173,6 +195,11 @@ const App = () => {
         setShowConfetti(false);
       }, 3000);
     }, 300);
+  };
+
+  // Handle image load
+  const handleImageLoad = () => {
+    setImageLoaded(true);
   };
 
   // Get today's date
@@ -244,8 +271,21 @@ const App = () => {
           {showTodo ? (
             <Todo />
           ) : (
-            <div className={`quote-card ${isAnimating ? 'fade-out' : 'fade-in'}`}>
-              <p className="quote">{currentQuote}</p>
+            <div className={`quote-container ${isAnimating ? 'fade-out' : 'fade-in'}`}>
+              <div className="quote-card">
+                <p className="quote">{currentQuote.text}</p>
+                <p className="quote-author">— {currentQuote.author}</p>
+              </div>
+              
+              <div className="quote-image-container">
+                {!imageLoaded && <div className="image-loader"></div>}
+                <img 
+                  src={currentQuote.imageUrl} 
+                  alt="Inspirational" 
+                  className={`quote-image ${imageLoaded ? 'loaded' : ''}`}
+                  onLoad={handleImageLoad}
+                />
+              </div>
               
               <button 
                 className="inspire-button"
